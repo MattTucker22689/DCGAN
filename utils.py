@@ -5,8 +5,7 @@ import sys
 
 
 def to_np(var):
-    """Exports torch.Tensor to Numpy array.
-    """
+   # Exports torch.Tensor to Numpy array.
     return var.detach().cpu().numpy()
 
 
@@ -21,9 +20,8 @@ def create_folder(folder_path):
 
 
 def clear_folder(folder_path):
-    """Clear all contents recursively if the folder exists.
-    Create the folder if it has been accidently deleted.
-    """
+    # Clear all contents recursively if the folder exists.
+    # Create the folder if it has been accidentally deleted.
     create_folder(folder_path)
     for the_file in os.listdir(folder_path):
         _file_path = os.path.join(folder_path, the_file)
@@ -37,8 +35,7 @@ def clear_folder(folder_path):
 
 
 class StdOut(object):
-    """Redirect stdout to file, and print to console as well.
-    """
+    # Redirect stdout to file, and print to console as well.
     def __init__(self, output_file):
         self.terminal = sys.stdout
         self.log = open(output_file, "a")
