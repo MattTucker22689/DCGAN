@@ -10,8 +10,7 @@ def to_np(var):
 
 
 def create_folder(folder_path):
-    """Create a folder if it does not exist.
-    """
+    # Create a folder if it does not exist.
     try:
         os.makedirs(folder_path)
     except OSError as _e:
