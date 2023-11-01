@@ -14,7 +14,7 @@ import torchvision.utils as vutils
 
 import utils
 
-
+LOAD_MODEL = True
 CUDA = True     # Change to False for CPU training
 OUT_PATH = 'output'
 LOG_FILE = os.path.join(OUT_PATH, 'log.txt')
@@ -27,8 +27,13 @@ D_HIDDEN = 64
 EPOCH_NUM = 500
 REAL_LABEL = 1
 FAKE_LABEL = 0
-lr = 2e-4
+lr = 1.5e-4
 seed = 1            # Change to None to get different results at each run
+
+LOAD_MODEL = False
+lastEpoch = 499
+CHECKPOINT_GEN = 'genCheckpoint_' + str(lastEpoch) + '.pth.tar'
+CHECKPOINT_DISC = 'discrimCheckpoint_' + str(lastEpoch) + '.pth.tar'
 
 utils.clear_folder(OUT_PATH)
 print("Logging to {}\n".format(LOG_FILE))
@@ -61,15 +66,25 @@ dataloader = torch.utils.data.DataLoader(dataset, batch_size=BATCH_SIZE,
 device = torch.device("cuda:0" if CUDA else "cpu")
 
 
+def load_checkpoint(checkpoint_file, model, optimizer, lr):
+    print("=> Loading checkpoint")
+    checkpoint = torch.load(checkpoint_file, map_location=config.DEVICE)
+    model.load_state_dict(checkpoint["state_dict"])
+    optimizer.load_state_dict(checkpoint["optimizer"])
+    
+    for param_group in optimizer.param_groups:
+        param_group["lr"] = lr
+    
+
 def weights_init(m):
-    """custom weights initialization
-    """
+    # custom weights initialization
     classname = m.__class__.__name__
     if classname.find('Conv') != -1:
         m.weight.data.normal_(0.0, 0.02)
     elif classname.find('BatchNorm') != -1:
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
+        
 
 class Generator(nn.Module):
     def __init__(self):
@@ -168,6 +183,15 @@ viz_noise = torch.randn(BATCH_SIZE, Z_DIM, 1, 1, device=device)
 optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(0.5, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(0.5, 0.999))
 
+
+if LOAD_MODEL:
+    load_checkpoint(
+        CHECKPOINT_GEN, netG, optimizerG, lr,
+    )
+    load_checkpoint(
+        CHECKPOINT_DISC, netD, optimizerD, lr,
+    )
+
 for epoch in range(EPOCH_NUM):
     for i, data in enumerate(dataloader):
         x_real = data[0].to(device)
@@ -209,7 +233,20 @@ for epoch in range(EPOCH_NUM):
             ))
     vutils.save_image(x_real, os.path.join(OUT_PATH, 'real_samples.png'), normalize=True)
     with torch.no_grad():
+        viz_noise = torch.randn(1, Z_DIM, 1, 1, device=device)
         viz_sample = netG(viz_noise)
         vutils.save_image(viz_sample, os.path.join(OUT_PATH, 'fake_samples_{}.png'.format(epoch)), normalize=True)
-    torch.save(netG.state_dict(), os.path.join(OUT_PATH, 'netG_{}.pth'.format(epoch)))
-    torch.save(netD.state_dict(), os.path.join(OUT_PATH, 'netD_{}.pth'.format(epoch)))
+        
+    ###########################################################################
+    
+    checkpointG = {
+        "state_dict": netG.state_dict(),
+        "optimizer": optimizerG.state_dict(),
+    }
+    torch.save(checkpointG, os.path.join(OUT_PATH, 'genCheckpoint_{}.pth.tar'.format(epoch)))
+    
+    checkpointD = {
+        "state_dict": netD.state_dict(),
+        "optimizer": optimizerD.state_dict(),
+    }
+    torch.save(checkpointD, os.path.join(OUT_PATH, 'discrimCheckpoint_{}.pth.tar'.format(epoch)))
