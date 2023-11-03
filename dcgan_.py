@@ -30,8 +30,9 @@ FAKE_LABEL = 0
 lr = 1.5e-4
 seed = 1            # Change to None to get different results at each run
 
+# DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LOAD_MODEL = False
-lastEpoch = 499
+lastEpoch = 0
 CHECKPOINT_GEN = 'genCheckpoint_' + str(lastEpoch) + '.pth.tar'
 CHECKPOINT_DISC = 'discrimCheckpoint_' + str(lastEpoch) + '.pth.tar'
 
@@ -68,7 +69,7 @@ device = torch.device("cuda:0" if CUDA else "cpu")
 
 def load_checkpoint(checkpoint_file, model, optimizer, lr):
     print("=> Loading checkpoint")
-    checkpoint = torch.load(checkpoint_file, map_location=config.DEVICE)
+    checkpoint = torch.load(checkpoint_file, map_location=device)
     model.load_state_dict(checkpoint["state_dict"])
     optimizer.load_state_dict(checkpoint["optimizer"])
     
@@ -186,13 +187,13 @@ optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(0.5, 0.999))
 
 if LOAD_MODEL:
     load_checkpoint(
-        CHECKPOINT_GEN, netG, optimizerG, lr,
+        os.path.join(OUT_PATH, CHECKPOINT_GEN), netG, optimizerG, lr,
     )
     load_checkpoint(
-        CHECKPOINT_DISC, netD, optimizerD, lr,
+        os.path.join(OUT_PATH, CHECKPOINT_DISC), netD, optimizerD, lr,
     )
 
-for epoch in range(EPOCH_NUM):
+for epoch in range( lastEpoch + 1, EPOCH_NUM + lastEpoch):
     for i, data in enumerate(dataloader):
         x_real = data[0].to(device)
         real_label = torch.full((x_real.size(0),), REAL_LABEL, device=device)
