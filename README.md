@@ -9,6 +9,8 @@ To run, you will need the following folders:
       
       - "outputs" where you can find examples made by your model while it was training.
 
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 The Excel Speadsheet is a tool I quickly threw together to act as a size calculator for convolutions and "transposed" convolutions.
+
+I may make a macro later.
