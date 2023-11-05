@@ -14,7 +14,6 @@ import torchvision.utils as vutils
 
 import utils
 
-LOAD_MODEL = True
 CUDA = True     # Change to False for CPU training
 OUT_PATH = 'output'
 LOG_FILE = os.path.join(OUT_PATH, 'log.txt')
@@ -30,11 +29,16 @@ FAKE_LABEL = 0
 lr = 1.5e-4
 seed = 1            # Change to None to get different results at each run
 
+
+################################################################################
 # DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-LOAD_MODEL = False
-lastEpoch = 0
+CPOINT = 'checkpoints'
+LOAD_MODEL = True
+lastEpoch = 342
 CHECKPOINT_GEN = 'genCheckpoint_' + str(lastEpoch) + '.pth.tar'
 CHECKPOINT_DISC = 'discrimCheckpoint_' + str(lastEpoch) + '.pth.tar'
+################################################################################
+
 
 utils.clear_folder(OUT_PATH)
 print("Logging to {}\n".format(LOG_FILE))
@@ -187,10 +191,10 @@ optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(0.5, 0.999))
 
 if LOAD_MODEL:
     load_checkpoint(
-        os.path.join(OUT_PATH, CHECKPOINT_GEN), netG, optimizerG, lr,
+        os.path.join(CPOINT, CHECKPOINT_GEN), netG, optimizerG, lr,
     )
     load_checkpoint(
-        os.path.join(OUT_PATH, CHECKPOINT_DISC), netD, optimizerD, lr,
+        os.path.join(CPOINT, CHECKPOINT_DISC), netD, optimizerD, lr,
     )
 
 for epoch in range( lastEpoch + 1, EPOCH_NUM + lastEpoch):
