@@ -1,7 +1,7 @@
 # DCGAN
 Image generation using a deep convolutional generative adversarial network(DCGAN).
 
-To run, you will need the following folders:
+To run, you will need to add the following folders\files:
 
       - "dataset" which contains other folders with your data
       
